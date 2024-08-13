@@ -1,4 +1,4 @@
-import express from "express";
+import express, {Request, Response}  from "express";
 
 const app = express();
 const port = 3005;
@@ -21,7 +21,7 @@ const db = {
   ],
 };
 
-app.get("/", (req: any, res: any) => {
+app.get("/", (req:Request, res: Response) => {
   res.json(1000);
 });
 

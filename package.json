@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon ./dist/index.js",
     "inspect": "nodemon --inspect ./src/index.ts",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "build": "tsc",
+    "start": "node ./dist/index.js"
   },
   "dependencies": {
     "express": "^4.19.2"
