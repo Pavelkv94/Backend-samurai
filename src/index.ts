@@ -1,9 +1,10 @@
+import { log } from "console";
 import express, {Request, Response}  from "express";
 
-const app = express();
+export const app = express();
 const port = 3005;
 
-const HTTP_STATUSES = {
+export const HTTP_STATUSES = {
   OK_200: 200,
   CREATED_201: 201,
   NO_CONTENT_204: 204,
@@ -66,7 +67,7 @@ app.put("/courses/:id", (req: any, res: any) => {
   // db.courses = db.courses.map(el => el.id === +req.params.id ? {...el, title: req.body.title} : el)
 
   if (!req.params.id || !req.body.title) {
-    res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+    res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
     return;
   }
   //@ts-ignore
@@ -85,6 +86,11 @@ app.delete("/courses/:id", (req: any, res: any) => {
   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 });
 
+app.delete("/__test__/data", (req: any, res: any) => {
+  db.courses = [];
+  res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+});
+
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Log:  app listening on port ${port}`);
 });
