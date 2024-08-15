@@ -1,5 +1,7 @@
 import request from "supertest";
 import { app, HTTP_STATUSES } from "../../src";
+import { CourseCreateInputModel } from "../../src/models/CourseCreateModel";
+import { CourseUpdateInputModel } from "../../src/models/CourseUpdateModel";
 
 describe("/course", () => {
   beforeAll(async () => {
@@ -16,7 +18,9 @@ describe("/course", () => {
   });
 
   it("shouldnt CREATE data in db", async () => {
-    await request(app).post("/courses").send({ title: "" }).expect(HTTP_STATUSES.BAD_REQUEST_400);
+    const data: CourseCreateInputModel = { title: "" };
+
+    await request(app).post("/courses").send(data).expect(HTTP_STATUSES.BAD_REQUEST_400);
 
     await request(app).get("/courses").expect(HTTP_STATUSES.OK_200, []);
   });
@@ -24,7 +28,8 @@ describe("/course", () => {
   let createdCourse: any = null;
 
   it("should CREATE data in db", async () => {
-    const response = await request(app).post("/courses").send({ title: "PYTHON" }).expect(HTTP_STATUSES.CREATED_201);
+    const data: CourseCreateInputModel = { title: "PYTHON" };
+    const response = await request(app).post("/courses").send(data).expect(HTTP_STATUSES.CREATED_201);
 
     createdCourse = response.body;
 
@@ -41,17 +46,16 @@ describe("/course", () => {
 
     await request(app)
       .get("/courses/" + createdCourse.id)
-      .expect(HTTP_STATUSES.OK_200, createdCourse);
+      .expect(HTTP_STATUSES.OK_200, { id: createdCourse.id, title: createdCourse.title });
   });
 
   it("should UPDATE data in db", async () => {
-    await request(app).put(`/courses/${createdCourse.id}`).send({ title: "NEW PYTHON" }).expect(HTTP_STATUSES.OK_200);
+    const data: CourseUpdateInputModel = { title: "NEW PYTHON" };
+
+    await request(app).put(`/courses/${createdCourse.id}`).send(data).expect(HTTP_STATUSES.OK_200);
 
     await request(app)
       .get("/courses/" + createdCourse.id)
-      .expect(HTTP_STATUSES.OK_200, {...createdCourse, title: "NEW PYTHON"});
+      .expect(HTTP_STATUSES.OK_200, { id: createdCourse.id, title: "NEW PYTHON" });
   });
-
 });
-
-
