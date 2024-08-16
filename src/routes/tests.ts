@@ -1,5 +1,4 @@
 import { DBType } from "../db/db";
-import { Express } from "express";
 import express from "express";
 import { HTTP_STATUSES } from "../constants";
 

@@ -8,6 +8,7 @@ import { CourseUpdateInputModel } from "../models/CourseUpdateModel";
 import { CourseType, DBType } from "../db/db";
 import express from "express";
 import { HTTP_STATUSES } from "../constants";
+import { coursesRepository } from "../db/courseRepository";
 
 export const getCourseViewDto = (course: CourseType): CourseViewModel => ({
   id: course.id,
@@ -19,18 +20,16 @@ export const coursesRouter = express.Router();
 export const getCoursesRouter = (db: DBType) => {
   coursesRouter.get("/", (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
-    let foundCourses = db.courses;
-    if (req.query.title) {
-      foundCourses = foundCourses.filter((el) => el.title.indexOf(req.query.title as string) > -1);
-    }
 
-    res.json(foundCourses.map((dbCourse) => ({ id: dbCourse.id, title: dbCourse.title })));
+    const courses = coursesRepository.findCourses(req.query.title);
+
+    res.json(courses.map((dbCourse) => ({ id: dbCourse.id, title: dbCourse.title })));
   });
 
   coursesRouter.get("/:id", (req: RequestWithParams<URIParamsCourseIdModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    const foundCourse = db.courses.find((el) => el.id === +req.params.id);
+    const foundCourse = coursesRepository.findCourseById(req.params.id);
 
     if (!foundCourse) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -46,12 +45,7 @@ export const getCoursesRouter = (db: DBType) => {
       res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
       return;
     }
-    const newItem: CourseType = {
-      id: +new Date(),
-      title: req.body.title,
-      studentsCount: 0,
-    };
-    db.courses.push(newItem);
+    const newItem = coursesRepository.createCourse(req.body.title);
 
     res.status(201).json(getCourseViewDto(newItem));
   });
@@ -59,34 +53,34 @@ export const getCoursesRouter = (db: DBType) => {
   coursesRouter.put("/:id", (req: RequestWithParamsAndBody<URIParamsCourseIdModel, CourseUpdateInputModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    // db.courses = db.courses.map(el => el.id === +req.params.id ? {...el, title: req.body.title} : el)
-
     if (!req.params.id || !req.body.title) {
       res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
       return;
     }
-    const foundCourse = db.courses.find((el) => el.id === +req.params.id);
 
-    if (!foundCourse) {
+    const isUpdated = coursesRepository.updateCourse(req.body.title, req.params.id);
+
+    if (isUpdated) {
+      const updatedCourse = coursesRepository.findCourseById(req.params.id);
+      updatedCourse && res.json(getCourseViewDto(updatedCourse));
+    } else {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       return;
     }
-
-    foundCourse.title = req.body.title;
-
-    res.json(getCourseViewDto(foundCourse));
   });
 
   coursesRouter.delete("/:id", (req: RequestWithParams<URIParamsCourseIdModel>, res: Response) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    db.courses = db.courses.filter((el) => el.id !== +req.params.id);
-
     if (!req.params.id) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       return;
     }
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    const isDeleted = coursesRepository.deleteCourse(req.params.id);
+
+    if (isDeleted) {
+      res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
   });
 
   return coursesRouter;
