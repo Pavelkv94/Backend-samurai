@@ -10,6 +10,7 @@ import express from "express";
 import { HTTP_STATUSES } from "../constants";
 import { coursesRepository } from "../db/courseRepository";
 import { body, validationResult } from "express-validator";
+import { validationInputMiddleware } from "../middlewares/validationMiddleware";
 
 type CourseViewModelWithErrors = {
   errors: any[];
@@ -47,6 +48,7 @@ export const getCoursesRouter = () => {
     "/",
     body("title").isString(),
     body("title").isLength({ min: 1, max: 20 }).withMessage("TITLE SHOULD BE FROM 1 TO 20"),
+    validationInputMiddleware, 
     (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel | CourseViewModelWithErrors>) => {
       //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
@@ -55,12 +57,6 @@ export const getCoursesRouter = () => {
         return;
       }
 
-      //EXPRESS VALIDATION
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errors: errors.array() });
-      }
       const newItem = coursesRepository.createCourse(req.body.title);
 
       res.status(201).json(getCourseViewDto(newItem));
