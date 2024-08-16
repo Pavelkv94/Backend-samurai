@@ -11,5 +11,5 @@ app.use(jsonBodyMiddleware);
 
 app.use(requestMiddleware);
 
-app.use("/courses", getCoursesRouter(db));
+app.use("/courses", getCoursesRouter());
 app.use("/__test__", getTestsRouter(db));

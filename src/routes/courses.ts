@@ -9,6 +9,11 @@ import { CourseType, DBType } from "../db/db";
 import express from "express";
 import { HTTP_STATUSES } from "../constants";
 import { coursesRepository } from "../db/courseRepository";
+import { body, validationResult } from "express-validator";
+
+type CourseViewModelWithErrors = {
+  errors: any[];
+};
 
 export const getCourseViewDto = (course: CourseType): CourseViewModel => ({
   id: course.id,
@@ -17,7 +22,7 @@ export const getCourseViewDto = (course: CourseType): CourseViewModel => ({
 
 export const coursesRouter = express.Router();
 
-export const getCoursesRouter = (db: DBType) => {
+export const getCoursesRouter = () => {
   coursesRouter.get("/", (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
@@ -38,17 +43,29 @@ export const getCoursesRouter = (db: DBType) => {
     res.json(getCourseViewDto(foundCourse));
   });
 
-  coursesRouter.post("/", (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel>) => {
-    //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
+  coursesRouter.post(
+    "/",
+    body("title").isString(),
+    body("title").isLength({ min: 1, max: 20 }).withMessage("TITLE SHOULD BE FROM 1 TO 20"),
+    (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel | CourseViewModelWithErrors>) => {
+      //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    if (!req.body.title) {
-      res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
-      return;
+      if (!req.body.title) {
+        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
+        return;
+      }
+
+      //EXPRESS VALIDATION
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUSES.BAD_REQUEST_400).json({ errors: errors.array() });
+      }
+      const newItem = coursesRepository.createCourse(req.body.title);
+
+      res.status(201).json(getCourseViewDto(newItem));
     }
-    const newItem = coursesRepository.createCourse(req.body.title);
-
-    res.status(201).json(getCourseViewDto(newItem));
-  });
+  );
 
   coursesRouter.put("/:id", (req: RequestWithParamsAndBody<URIParamsCourseIdModel, CourseUpdateInputModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
