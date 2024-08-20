@@ -8,9 +8,9 @@ import { CourseUpdateInputModel } from "../models/CourseUpdateModel";
 import { CourseType } from "../db/db";
 import express from "express";
 import { HTTP_STATUSES } from "../constants";
-import { coursesRepository } from "../db/courseRepository-fromDB";
 import { body } from "express-validator";
 import { validationInputMiddleware } from "../middlewares/validationMiddleware";
+import { coursesService } from "../domain/courses-service";
 
 type CourseViewModelWithErrors = {
   errors: any[];
@@ -33,7 +33,7 @@ export const getCoursesRouter = () => {
     // } //todo пока работает цикл сервер занят и не доступен для других запросов
 
     
-    const courses: CourseType[] = await coursesRepository.findCourses(req.query.title);
+    const courses: CourseType[] = await coursesService.findCourses(req.query.title);
 
     res.json(courses.map(getCourseViewDto));
   });
@@ -41,7 +41,7 @@ export const getCoursesRouter = () => {
   coursesRouter.get("/:id", async (req: RequestWithParams<URIParamsCourseIdModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    const foundCourse: CourseType | null = await coursesRepository.findCourseById(req.params.id);
+    const foundCourse: CourseType | null = await coursesService.findCourseById(req.params.id);
 
     if (!foundCourse) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -63,7 +63,7 @@ export const getCoursesRouter = () => {
         return;
       }
 
-      const newItem: CourseType = await coursesRepository.createCourse(req.body.title);
+      const newItem: CourseType = await coursesService.createCourse(req.body.title);
 
       res.status(201).json(getCourseViewDto(newItem));
     }
@@ -77,10 +77,10 @@ export const getCoursesRouter = () => {
       return;
     }
 
-    const isUpdated: boolean = await coursesRepository.updateCourse(req.body.title, req.params.id);
+    const isUpdated: boolean = await coursesService.updateCourse(req.body.title, req.params.id);
 
     if (isUpdated) {
-      const updatedCourse = await coursesRepository.findCourseById(req.params.id);
+      const updatedCourse = await coursesService.findCourseById(req.params.id);
       updatedCourse && res.json(getCourseViewDto(updatedCourse));
     } else {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -95,7 +95,7 @@ export const getCoursesRouter = () => {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       return;
     }
-    const isDeleted: boolean = await coursesRepository.deleteCourse(req.params.id);
+    const isDeleted: boolean = await coursesService.deleteCourse(req.params.id);
 
     if (isDeleted) {
       res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);

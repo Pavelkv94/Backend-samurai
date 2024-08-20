@@ -13,12 +13,7 @@ export const coursesRepository = {
 
     return foundCourse || null;
   },
-  async createCourse(title: string): Promise<CourseType> {
-    const newItem: CourseType = {
-      id: +new Date(),
-      title: title,
-      studentsCount: 0,
-    };
+  async createCourse(newItem: CourseType): Promise<CourseType> {
     await coursesCollection.insertOne(newItem);
 
     return newItem;
