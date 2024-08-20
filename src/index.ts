@@ -5,6 +5,7 @@ import { getCoursesRouter } from "./routes/courses";
 import { getTestsRouter } from "./routes/tests";
 import { db, runDb } from "./db/db";
 import { requestMiddleware } from "./middlewares/requestCountMiddleware";
+import { CYAN, GREEN, RED, RESET } from "./constants";
 
 export const app = express();
 
@@ -20,7 +21,7 @@ const startApp = async () => {
   await runDb();
 
   app.listen(port, () => {
-    console.log(`Log:  app listening on port ${port}`);
+    console.log(CYAN + `Log:  app listening on port ${port}` + RESET);
   });
 };
 

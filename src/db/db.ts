@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { CYAN, RESET } from "../constants";
 
 export type CourseType = {
   id: number;
@@ -17,7 +18,7 @@ export async function runDb() {
   try {
     await client.connect();
     await client.db("test").command({ ping: 1 });
-    console.log("Log: MongoDB connected!");
+    console.log(CYAN + "Log: MongoDB connected!" + RESET);
   } catch (error) {
     console.log(error);
   }
