@@ -12,6 +12,5 @@ export const db: DBType = {
     { id: 2, title: "html", studentsCount: 10 },
     { id: 3, title: "css", studentsCount: 10 },
     { id: 4, title: "REACT", studentsCount: 2 },
-
   ],
 };

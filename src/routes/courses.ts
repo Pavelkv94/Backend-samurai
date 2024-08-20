@@ -24,18 +24,24 @@ export const getCourseViewDto = (course: CourseType): CourseViewModel => ({
 export const coursesRouter = express.Router();
 
 export const getCoursesRouter = () => {
-  coursesRouter.get("/", (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
+  coursesRouter.get("/", async (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    const courses = coursesRepository.findCourses(req.query.title);
+    // let start = +new Date();
+    // while(+new Date - start < 3000) {
+    //   console.log(+new Date - start)
+    // } //todo пока работает цикл сервер занят и не доступен для других запросов
 
-    res.json(courses.map((dbCourse) => ({ id: dbCourse.id, title: dbCourse.title })));
+    
+    const courses: CourseType[] = await coursesRepository.findCourses(req.query.title);
+
+    res.json(courses.map(getCourseViewDto));
   });
 
-  coursesRouter.get("/:id", (req: RequestWithParams<URIParamsCourseIdModel>, res: Response<CourseViewModel>) => {
+  coursesRouter.get("/:id", async (req: RequestWithParams<URIParamsCourseIdModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
-    const foundCourse = coursesRepository.findCourseById(req.params.id);
+    const foundCourse: CourseType | null = await coursesRepository.findCourseById(req.params.id);
 
     if (!foundCourse) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -49,7 +55,7 @@ export const getCoursesRouter = () => {
     body("title").isString(),
     body("title").isLength({ min: 1, max: 20 }).withMessage("TITLE SHOULD BE FROM 1 TO 20"),
     validationInputMiddleware, 
-    (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel | CourseViewModelWithErrors>) => {
+    async (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel | CourseViewModelWithErrors>) => {
       //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
       if (!req.body.title) {
@@ -57,13 +63,13 @@ export const getCoursesRouter = () => {
         return;
       }
 
-      const newItem = coursesRepository.createCourse(req.body.title);
+      const newItem: CourseType = await coursesRepository.createCourse(req.body.title);
 
       res.status(201).json(getCourseViewDto(newItem));
     }
   );
 
-  coursesRouter.put("/:id", (req: RequestWithParamsAndBody<URIParamsCourseIdModel, CourseUpdateInputModel>, res: Response<CourseViewModel>) => {
+  coursesRouter.put("/:id", async (req: RequestWithParamsAndBody<URIParamsCourseIdModel, CourseUpdateInputModel>, res: Response<CourseViewModel>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
     if (!req.params.id || !req.body.title) {
@@ -71,10 +77,10 @@ export const getCoursesRouter = () => {
       return;
     }
 
-    const isUpdated = coursesRepository.updateCourse(req.body.title, req.params.id);
+    const isUpdated: boolean = await coursesRepository.updateCourse(req.body.title, req.params.id);
 
     if (isUpdated) {
-      const updatedCourse = coursesRepository.findCourseById(req.params.id);
+      const updatedCourse = await coursesRepository.findCourseById(req.params.id);
       updatedCourse && res.json(getCourseViewDto(updatedCourse));
     } else {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -82,14 +88,14 @@ export const getCoursesRouter = () => {
     }
   });
 
-  coursesRouter.delete("/:id", (req: RequestWithParams<URIParamsCourseIdModel>, res: Response) => {
+  coursesRouter.delete("/:id", async (req: RequestWithParams<URIParamsCourseIdModel>, res: Response) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
     if (!req.params.id) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       return;
     }
-    const isDeleted = coursesRepository.deleteCourse(req.params.id);
+    const isDeleted: boolean = await coursesRepository.deleteCourse(req.params.id);
 
     if (isDeleted) {
       res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
