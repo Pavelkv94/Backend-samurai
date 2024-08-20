@@ -1,9 +1,29 @@
+import { MongoClient } from "mongodb";
+
 export type CourseType = {
   id: number;
   title: string;
   studentsCount: number;
 };
 
+
+const mongoUri = process.env.MONGO_URI || "mongodb://0.0.0.0:27017";
+
+const client = new MongoClient(mongoUri);
+
+export const coursesCollection = client.db("test").collection<CourseType>("Courses");
+
+export async function runDb() {
+  try {
+    await client.connect();
+    await client.db("test").command({ ping: 1 });
+    console.log("Log: MongoDB connected!");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+//OLD DB
 export type DBType = { courses: CourseType[] };
 
 export const db: DBType = {

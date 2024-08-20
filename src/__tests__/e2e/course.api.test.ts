@@ -1,8 +1,9 @@
 import request from "supertest";
-import { CourseCreateInputModel } from "../../src/models/CourseCreateModel";
-import { CourseUpdateInputModel } from "../../src/models/CourseUpdateModel";
-import { app } from "../../src/app";
-import { HTTP_STATUSES } from "../../src/constants";
+import { app } from "../..";
+import { HTTP_STATUSES } from "../../constants";
+import { CourseCreateInputModel } from "../../models/CourseCreateModel";
+import { CourseUpdateInputModel } from "../../models/CourseUpdateModel";
+
 
 describe("/course", () => {
   beforeAll(async () => {

@@ -5,11 +5,11 @@ import { RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWi
 import { URIParamsCourseIdModel } from "../models/URIParamsCourseIdModel";
 import { CourseCreateInputModel } from "../models/CourseCreateModel";
 import { CourseUpdateInputModel } from "../models/CourseUpdateModel";
-import { CourseType, DBType } from "../db/db";
+import { CourseType } from "../db/db";
 import express from "express";
 import { HTTP_STATUSES } from "../constants";
-import { coursesRepository } from "../db/courseRepository";
-import { body, validationResult } from "express-validator";
+import { coursesRepository } from "../db/courseRepository-fromDB";
+import { body } from "express-validator";
 import { validationInputMiddleware } from "../middlewares/validationMiddleware";
 
 type CourseViewModelWithErrors = {
