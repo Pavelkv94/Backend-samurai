@@ -7,6 +7,8 @@ export const coursesRepository = {
       filter.title = { $regex: title };
     }
     // return coursesCollection.find(filter).skip(2).limit(2).toArray(); //todo пагинация в mongoDb
+    //return coursesCollection.find(filter).sort({title: -1}).toArray(); //todo сортировка в mongoDb
+
     return coursesCollection.find(filter).toArray();
   },
   async findCourseById(id: string): Promise<CourseType | null> {
