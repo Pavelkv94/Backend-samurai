@@ -7,6 +7,7 @@ import { db, runDb } from "./db/db";
 import { requestMiddleware } from "./middlewares/requestCountMiddleware";
 import { CYAN, GREEN, RED, RESET } from "./constants";
 import { userRouter } from "./routes/users";
+import { emailRouter } from "./routes/mail";
 
 export const app = express();
 
@@ -18,6 +19,7 @@ app.use(requestMiddleware);
 app.use("/courses", getCoursesRouter());
 app.use("/__test__", getTestsRouter(db));
 app.use("/users", userRouter);
+app.use(emailRouter);
 
 const startApp = async () => {
   await runDb();
