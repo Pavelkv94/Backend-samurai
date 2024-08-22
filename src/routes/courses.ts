@@ -10,7 +10,7 @@ import express from "express";
 import { HTTP_STATUSES } from "../constants";
 import { body } from "express-validator";
 import { validationInputMiddleware } from "../middlewares/validationMiddleware";
-import { coursesService } from "../domain/courses-service";
+import { coursesService } from "../services/courses-service";
 
 type CourseViewModelWithErrors = {
   errors: any[];
