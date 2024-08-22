@@ -1,7 +1,8 @@
 import { Request, Response, Router } from "express";
 import { usersRepository } from "../db/usersRepository";
 import { HTTP_STATUSES } from "../constants";
-import { userService } from "../services/users-service";
+import { userService } from "../domain/users-service";
+import { jwtService } from "../app/jwt-service";
 
 export const userRouter = Router();
 
@@ -12,18 +13,20 @@ userRouter.get("/", async (req, res) => {
 });
 
 userRouter.post("/", async (req, res) => {
-    const payload = req.body;
-    const newUser = await userService.createUser(payload.login, payload.password)
+  const payload = req.body;
+  const newUser = await userService.createUser(payload.login, payload.password);
 
-    res.json(newUser)
+  res.json(newUser);
 });
 
 userRouter.post("/login", async (req: Request, res: Response) => {
-    const checkResult = await userService.checkCredentials(req.body)
+  const user = await userService.checkCredentials(req.body);
 
-    if(checkResult) {
-        res.status(200).send("User logged")
-    } else {
-        res.status(404).send("NOT EXIST")
-    }
+  if (user) {
+    const token = await jwtService.createJWT(user);
+
+    res.status(200).send(token);
+  } else {
+    res.status(404).send("NOT EXIST");
+  }
 });

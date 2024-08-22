@@ -23,12 +23,12 @@ export const userService = {
   async checkCredentials(payload: PayloadType) {
     const user = await usersRepository.findByLogin(payload.login);
 
-    if (!user) return false;
+    if (!user) return null;
     const passwordHash = await this._generateHash(payload.password, user.passwordSalt);
     if (user.passwordHash !== passwordHash) {
-      return false;
+      return null;
     }
-    return true;
+    return user;
   },
 
   async _generateHash(pass: string, salt: string) {

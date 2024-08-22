@@ -10,7 +10,8 @@ import express from "express";
 import { HTTP_STATUSES } from "../constants";
 import { body } from "express-validator";
 import { validationInputMiddleware } from "../middlewares/validationMiddleware";
-import { coursesService } from "../services/courses-service";
+import { coursesService } from "../domain/courses-service";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 type CourseViewModelWithErrors = {
   errors: any[];
@@ -24,7 +25,7 @@ export const getCourseViewDto = (course: CourseType): CourseViewModel => ({
 export const coursesRouter = express.Router();
 
 export const getCoursesRouter = () => {
-  coursesRouter.get("/", async (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
+  coursesRouter.get("/", authMiddleware, async (req: RequestWithQuery<CoursesQueryModel>, res: Response<CourseViewModel[]>) => {
     //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
     // let start = +new Date();
@@ -32,7 +33,6 @@ export const getCoursesRouter = () => {
     //   console.log(+new Date - start)
     // } //todo пока работает цикл сервер занят и не доступен для других запросов
 
-    
     const courses: CourseType[] = await coursesService.findCourses(req.query.title);
 
     res.json(courses.map(getCourseViewDto));
@@ -54,7 +54,7 @@ export const getCoursesRouter = () => {
     "/",
     body("title").isString(),
     body("title").isLength({ min: 1, max: 20 }).withMessage("TITLE SHOULD BE FROM 1 TO 20"),
-    validationInputMiddleware, 
+    validationInputMiddleware,
     async (req: RequestWithBody<CourseCreateInputModel>, res: Response<CourseViewModel | CourseViewModelWithErrors>) => {
       //todo types - {params Types}, {resBody types}, {reqBody types}, {query types}
 
