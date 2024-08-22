@@ -24,7 +24,8 @@ userRouter.post("/login", async (req: Request, res: Response) => {
 
   if (user) {
     const token = await jwtService.createJWT(user);
-
+    console.log(user);
+    
     res.status(200).send(token);
   } else {
     res.status(404).send("NOT EXIST");

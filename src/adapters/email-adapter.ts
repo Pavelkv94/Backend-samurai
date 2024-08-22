@@ -8,8 +8,8 @@ export const emailAdaptor = {
       port: 587,
       secure: true,
       auth: {
-        user: process.env.SMTP_USER || "<user email>",
-        pass: process.env.SMTP_PASSWORD || "<user password>",
+        user: process.env.SMTP_USER || "uykrop@gmail.com",
+        pass: process.env.SMTP_PASSWORD || "ejre kuig ztlf vpcb",
       },
     };
 

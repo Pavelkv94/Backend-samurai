@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { CYAN, RESET } from "../constants";
-import { UserViewModel } from "../models/UserModel";
+import { UserDBModel, UserViewModel } from "../models/UserModel";
 
 export type CourseType = {
   id: number;
@@ -14,7 +14,7 @@ const mongoUri = process.env.MONGO_URI || "mongodb://0.0.0.0:27017";
 const client = new MongoClient(mongoUri);
 
 export const coursesCollection = client.db("test").collection<CourseType>("Courses");
-export const usersCollection = client.db("test").collection<UserViewModel>("Users");
+export const usersCollection = client.db("test").collection<UserDBModel>("Users");
 
 export async function runDb() {
   try {
