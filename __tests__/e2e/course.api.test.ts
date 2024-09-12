@@ -3,6 +3,7 @@ import { CourseCreateInputModel } from "../../src/features/courses/models/Course
 import { CourseUpdateInputModel } from "../../src/features/courses/models/CourseUpdateModel";
 import { app, RouterPaths } from "../../src/app";
 import { HTTP_STATUSES } from "../../src/constants";
+import { courseTestManager } from "./utils/coursesTestManager";
 
 describe("/course", () => {
   beforeAll(async () => {
@@ -20,8 +21,7 @@ describe("/course", () => {
 
   it("shouldnt CREATE data in db", async () => {
     const data: CourseCreateInputModel = { title: "" };
-
-    await request(app).post(RouterPaths.courses).send(data).expect(HTTP_STATUSES.BAD_REQUEST_400);
+    await courseTestManager.createCourse(data, HTTP_STATUSES.BAD_REQUEST_400);
 
     await request(app).get(RouterPaths.courses).expect(HTTP_STATUSES.OK_200, []);
   });
@@ -30,14 +30,9 @@ describe("/course", () => {
 
   it("should CREATE data in db", async () => {
     const data: CourseCreateInputModel = { title: "PYTHON" };
-    const response = await request(app).post(RouterPaths.courses).send(data).expect(HTTP_STATUSES.CREATED_201);
+    const { createdEntity } = await courseTestManager.createCourse(data, HTTP_STATUSES.CREATED_201);
 
-    createdCourse = response.body;
-
-    expect(createdCourse).toEqual({
-      title: "PYTHON",
-      id: expect.any(Number),
-    });
+    createdCourse = createdEntity;
 
     await request(app).get(RouterPaths.courses).expect(HTTP_STATUSES.OK_200, [createdCourse]);
   });
@@ -46,7 +41,7 @@ describe("/course", () => {
     await request(app).put(`${RouterPaths.courses}/${createdCourse.id}`).send({ title: "" }).expect(HTTP_STATUSES.BAD_REQUEST_400);
 
     await request(app)
-      .get(RouterPaths.courses + createdCourse.id)
+      .get(RouterPaths.courses + "/" + createdCourse.id)
       .expect(HTTP_STATUSES.OK_200, { id: createdCourse.id, title: createdCourse.title });
   });
 
@@ -56,7 +51,7 @@ describe("/course", () => {
     await request(app).put(`${RouterPaths.courses}/${createdCourse.id}`).send(data).expect(HTTP_STATUSES.OK_200);
 
     await request(app)
-      .get(RouterPaths.courses + createdCourse.id)
+      .get(RouterPaths.courses + "/" + createdCourse.id)
       .expect(HTTP_STATUSES.OK_200, { id: createdCourse.id, title: "NEW PYTHON" });
   });
 });

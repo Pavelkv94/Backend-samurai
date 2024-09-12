@@ -3,6 +3,7 @@ import { app, RouterPaths } from "../../src/app";
 import { HTTP_STATUSES } from "../../src/constants";
 import { UserCreateInputModel } from "../../src/features/users/models/UserCreateModel";
 import { UserUpdateInputModel } from "../../src/features/users/models/UserUpdateModel";
+import { userTestManager } from "./utils/userTestManager";
 
 describe("tests for /users", () => {
   beforeAll(async () => {
@@ -19,9 +20,9 @@ describe("tests for /users", () => {
   });
 
   it("shouldnt CREATE data in db", async () => {
-    const data: UserCreateInputModel = { userName: "pavel" };
+    const data: UserCreateInputModel = { userName: "" };
 
-    await request(app).post(RouterPaths.users).send(data).expect(HTTP_STATUSES.BAD_REQUEST_400);
+    await userTestManager.createUser(data, HTTP_STATUSES.BAD_REQUEST_400);
 
     await request(app).get(RouterPaths.users).expect(HTTP_STATUSES.OK_200, []);
   });
@@ -30,24 +31,17 @@ describe("tests for /users", () => {
 
   it("should CREATE data in db", async () => {
     const data: UserCreateInputModel = { userName: "Pavel" };
-    const response = await request(app).post(RouterPaths.users).send(data).expect(HTTP_STATUSES.CREATED_201);
-
-    createdUser = response.body;
-
-    expect(createdUser).toEqual({
-      userName: "pavel",
-      id: expect.any(Number),
-    });
-
+    const { createdEntity } = await userTestManager.createUser(data, HTTP_STATUSES.CREATED_201);
+    createdUser = createdEntity
     await request(app).get(RouterPaths.users).expect(HTTP_STATUSES.OK_200, [createdUser]);
   });
 
   it("shouldnt UPDATE data in db", async () => {
-    await request(app).put(`${RouterPaths.users}/${createdUser.id}`).send({ title: "" }).expect(HTTP_STATUSES.BAD_REQUEST_400);
+    await request(app).put(`${RouterPaths.users}/${createdUser.id}`).send({ userName: "" }).expect(HTTP_STATUSES.BAD_REQUEST_400);
 
     await request(app)
-      .get(RouterPaths.users + createdUser.id)
-      .expect(HTTP_STATUSES.OK_200, { id: createdUser.id, title: createdUser.title });
+      .get(RouterPaths.users + "/" + createdUser.id)
+      .expect(HTTP_STATUSES.OK_200, { id: createdUser.id, userName: createdUser.userName });
   });
 
   it("should UPDATE data in db", async () => {
@@ -56,7 +50,7 @@ describe("tests for /users", () => {
     await request(app).put(`${RouterPaths.users}/${createdUser.id}`).send(data).expect(HTTP_STATUSES.OK_200);
 
     await request(app)
-      .get(RouterPaths.users + createdUser.id)
+      .get(RouterPaths.users + "/" + createdUser.id)
       .expect(HTTP_STATUSES.OK_200, { id: createdUser.id, userName: "Egor" });
   });
 });
