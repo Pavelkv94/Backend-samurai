@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "build": "tsc",
     "start": "node ./dist/index.js",
-    "test": "jest"
+    "test": "jest -i"
   },
   "dependencies": {
     "express": "^4.19.2"
